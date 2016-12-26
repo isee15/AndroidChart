@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        //mapView.setDataSource(R.raw.china);
+        //mapView.setDataSource(R.raw.qinghai);
         final List<String> listData = new ArrayList<>();
 //        listData.add("china");
 //        listData.add("beijing");

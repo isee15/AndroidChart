@@ -43,10 +43,10 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
         this.init();
     }
 
-    public MapChartView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        this.init();
-    }
+//    public MapChartView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+//        super(context, attrs, defStyleAttr, defStyleRes);
+//        this.init();
+//    }
 
     private void init() {
         holder = this.getHolder();

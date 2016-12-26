@@ -57,22 +57,30 @@ public class MapChartData {
 
                 if ("MultiPolygon".equals(type)) {
                     jsonArr = geometry.getJSONArray("encodeOffsets");
-                    jsonArr = jsonArr.getJSONArray(0);
+
                     List<List<Integer>> encodeOffsets = new ArrayList<>();
-                    for (int i = 0; i < jsonArr.size(); i++) {
-                        List<Integer> offset = new ArrayList<>();
-                        JSONArray point = (JSONArray) jsonArr.get(i);
-                        offset.add(point.getInteger(0));
-                        offset.add(point.getInteger(1));
-                        encodeOffsets.add(offset);
+
+                    for (int k = 0; k < jsonArr.size(); k++) {
+                        for (int i = 0; i < jsonArr.getJSONArray(k).size(); i++) {
+                            List<Integer> offset = new ArrayList<>();
+                            JSONArray point = jsonArr.getJSONArray(k).getJSONArray(i);
+                            offset.add(point.getInteger(0));
+                            offset.add(point.getInteger(1));
+                            encodeOffsets.add(offset);
+                        }
                     }
+
                     jsonArr = (JSONArray) geometry.get("coordinates");
-                    jsonArr = (JSONArray) jsonArr.get(0);
+
                     List<String> coordinates = new ArrayList<>();
-                    for (int i = 0; i < jsonArr.size(); i++) {
-                        String coordinate = (String) jsonArr.get(i);
-                        coordinates.add(coordinate);
+
+                    for (int k = 0; k < jsonArr.size(); k++) {
+                        for (int i = 0; i < jsonArr.getJSONArray(k).size(); i++) {
+                            String coordinate = jsonArr.getJSONArray(k).getString(i);
+                            coordinates.add(coordinate);
+                        }
                     }
+
                     for (int i = 0; i < coordinates.size(); i++) {
                         List<PointDouble> path = decodePolygon(coordinates.get(i), encodeOffsets.get(i));
                         paths.add(path);
