@@ -182,7 +182,9 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
                                     p.setStyle(Paint.Style.FILL);
                                     p.setStrokeWidth(1);
                                     Random rnd = new Random();
-                                    p.setColor(Color.argb(128, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)));
+                                    int[] colors = {0x87cefa,Color.YELLOW,0xFF4500};
+                                    p.setColor(MapChartData.intToColor(rnd.nextInt(1500) + rnd.nextInt(1000),colors,0,2500));
+                                    //p.setColor(Color.argb(128, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)));
                                     c.drawPath(path, p);
                                     p.setStyle(Paint.Style.STROKE);
                                     p.setStrokeWidth(1);

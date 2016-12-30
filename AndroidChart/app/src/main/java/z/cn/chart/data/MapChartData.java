@@ -1,6 +1,7 @@
 package z.cn.chart.data;
 
 import android.content.Context;
+import android.graphics.Color;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -9,7 +10,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import z.cn.chart.R;
 
@@ -19,8 +22,27 @@ import z.cn.chart.R;
  */
 
 public class MapChartData {
+    private static Map<Integer, List<MapFeature>> mapCache = new HashMap<>();
+
+
+    public static int intToColor(int value, int[] colors, int min, int max) {
+        if (value < min) value = min;
+        if (value > max) value = max;
+        double scaled = (value - min) * (colors.length - 1.0f) / (max - min);
+        int color0 = colors[(int) scaled];
+        int color1 = colors[(int) scaled + 1];
+        double fraction = scaled - (int) scaled;
+        int r = (int) ((1 - fraction) * Color.red(color0) + fraction * Color.red(color1));
+        int g = (int) ((1 - fraction) * Color.green(color0) + fraction * Color.green(color1));
+        int b = (int) ((1 - fraction) * Color.blue(color0) + fraction * Color.blue(color1));
+        int a = 255;
+        return Color.argb(a, r, g, b);
+    }
 
     public static List<MapFeature> getMapPaths(Context context, int mapId) {
+        if (mapCache.containsKey(mapId)) {
+            return mapCache.get(mapId);
+        }
         List<MapFeature> featureCollection = new ArrayList<>();
         InputStream inputStream = context.getResources().openRawResource(mapId);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -135,6 +157,7 @@ public class MapChartData {
         if (mapId == R.raw.china || mapId == R.raw.china_cities || mapId == R.raw.china_contour) {
             featureCollection.add(MapFeature.getNanhai());
         }
+        mapCache.put(mapId, featureCollection);
         return featureCollection;
     }
 
