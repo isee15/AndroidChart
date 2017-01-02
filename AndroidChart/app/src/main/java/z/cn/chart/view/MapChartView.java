@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -54,14 +55,40 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
         drawThread = new DrawThread(holder);
     }
 
-    public void setDataSource(int mapId) {
+    public void setDataSource(final int mapId) {
         if (!this.drawThread.isAlive() && isSurfaceViewCreated) {
             this.drawThread = new DrawThread(holder);
-            drawThread.dataSource = MapChartData.getMapPaths(this.getContext(), mapId);
-            this.drawThread.isRun = true;
-            this.drawThread.start();
-        }
-        else {
+            final Context finalContext = this.getContext();
+            final MapChartView finalThis = this;
+            new AsyncTask<Void, Void, Void>() {
+                /**
+                 * Override this method to perform a computation on a background thread. The
+                 * specified parameters are the parameters passed to {@link #execute}
+                 * by the caller of this task.
+                 * <p>
+                 * This method can call {@link #publishProgress} to publish updates
+                 * on the UI thread.
+                 *
+                 * @param params The parameters of the task.
+                 * @return A result, defined by the subclass of this task.
+                 * @see #onPreExecute()
+                 * @see #onPostExecute
+                 * @see #publishProgress
+                 */
+                @Override
+                protected Void doInBackground(Void... params) {
+                    drawThread.dataSource = MapChartData.getMapPaths(finalContext, mapId);
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    finalThis.drawThread.isRun = true;
+                    finalThis.drawThread.start();
+                }
+            }.execute();
+
+        } else {
             drawThread.dataSource = MapChartData.getMapPaths(this.getContext(), mapId);
         }
     }
@@ -182,8 +209,9 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
                                     p.setStyle(Paint.Style.FILL);
                                     p.setStrokeWidth(1);
                                     Random rnd = new Random();
-                                    int[] colors = {0x87cefa,Color.YELLOW,0xFF4500};
-                                    p.setColor(MapChartData.intToColor(rnd.nextInt(1500) + rnd.nextInt(1000),colors,0,2500));
+                                    int[] colors = {0x87cefa, Color.YELLOW, 0xFF4500};
+                                    // TODO: read Color from data
+                                    p.setColor(MapChartData.intToColor(rnd.nextInt(1500) + rnd.nextInt(1000), colors, 0, 2500));
                                     //p.setColor(Color.argb(128, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)));
                                     c.drawPath(path, p);
                                     p.setStyle(Paint.Style.STROKE);

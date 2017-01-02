@@ -99,7 +99,7 @@ public class MapFeature {
                     maxy = Math.max(point.y, maxy);
                 }
             }
-            cp = new PointDouble((maxx+minx)/2,(maxy+miny)/2);
+            cp = new PointDouble((maxx + minx) / 2, (maxy + miny) / 2);
         }
 
         return cp;

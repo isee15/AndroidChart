@@ -3,10 +3,10 @@ package z.cn.chart.data;
 import android.content.Context;
 import android.graphics.Color;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -44,21 +44,29 @@ public class MapChartData {
             return mapCache.get(mapId);
         }
         List<MapFeature> featureCollection = new ArrayList<>();
-        InputStream inputStream = context.getResources().openRawResource(mapId);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        int ctr;
+
+        String mResponse = "";
         try {
-            ctr = inputStream.read();
-            while (ctr != -1) {
-                byteArrayOutputStream.write(ctr);
-                ctr = inputStream.read();
-            }
-            inputStream.close();
+            InputStream is = context.getResources().openRawResource(mapId);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            mResponse = new String(buffer);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        JSONObject jsonObj = JSONObject.parseObject(byteArrayOutputStream.toString());
+//        int features = 0;
+//        features |= Feature.AutoCloseSource.mask;
+//        features |= Feature.InternFieldNames.mask;
+//        features |= Feature.UseBigDecimal.mask;
+//        features |= Feature.AllowUnQuotedFieldNames.mask;
+//        features |= Feature.AllowSingleQuotes.mask;
+//        features |= Feature.AllowArbitraryCommas.mask;
+//        features |= Feature.SortFeidFastMatch.mask;
+//        features |= Feature.IgnoreNotMatch.mask;
+        JSON.DEFAULT_PARSER_FEATURE = 0;
+        JSONObject jsonObj = JSONObject.parseObject(mResponse);
         JSONArray features = jsonObj.getJSONArray("features");
         JSONArray jsonArr;
         for (int ii = 0; ii < features.size(); ii++) {
