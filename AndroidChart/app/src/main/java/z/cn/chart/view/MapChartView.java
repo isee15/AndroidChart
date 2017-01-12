@@ -12,8 +12,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import z.cn.chart.adapter.IMapChartAdapter;
 import z.cn.chart.data.MapChartData;
 import z.cn.chart.data.MapFeature;
 import z.cn.chart.data.PointDouble;
@@ -53,6 +55,17 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
         holder = this.getHolder();
         holder.addCallback(this);
         drawThread = new DrawThread(holder);
+    }
+
+    public void setAdapter(IMapChartAdapter adapter) {
+        if (!this.drawThread.isAlive() && isSurfaceViewCreated) {
+            this.drawThread = new DrawThread(holder);
+            this.drawThread.isRun = true;
+            this.drawThread.adapter = adapter;
+            this.drawThread.start();
+        } else {
+            this.drawThread.adapter = adapter;
+        }
     }
 
     public void setDataSource(final int mapId) {
@@ -134,9 +147,10 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
     class DrawThread extends Thread {
 
         public boolean isRun;
-        public List<MapFeature> dataSource;
+        public IMapChartAdapter adapter;
 
         private SurfaceHolder holder;
+        private List<MapFeature> dataSource;
 
         public DrawThread(SurfaceHolder holder) {
             this.holder = holder;
@@ -157,7 +171,8 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
                     holder.unlockCanvasAndPost(c);//结束锁定画图，并提交改变。
                 }
             }
-
+            if (this.adapter == null) return;
+            this.dataSource = MapChartData.getMapPaths(getContext(), this.adapter.getResourceId());
             double minx = Integer.MAX_VALUE;
             double maxx = Integer.MIN_VALUE;
             double miny = Integer.MAX_VALUE;
@@ -206,14 +221,17 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
                                     }
                                     path.close();
 
-                                    p.setStyle(Paint.Style.FILL);
-                                    p.setStrokeWidth(1);
-                                    Random rnd = new Random();
-                                    int[] colors = {0x87cefa, Color.YELLOW, 0xFF4500};
-                                    // TODO: read Color from data
-                                    p.setColor(MapChartData.intToColor(rnd.nextInt(1500) + rnd.nextInt(1000), colors, 0, 2500));
-                                    //p.setColor(Color.argb(128, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)));
-                                    c.drawPath(path, p);
+                                    Map<String, Double> values = this.adapter.getValues();
+                                    if (values != null && values.get(feature.getName()) != null) {
+                                        p.setStyle(Paint.Style.FILL);
+                                        p.setStrokeWidth(1);
+                                        Random rnd = new Random();
+                                        int[] colors = this.adapter.getColorRange();
+                                        p.setColor(MapChartData.intToColor(values.get(feature.getName()).intValue(), colors, this.adapter.getValueMin(), this.adapter.getValueMax()));
+                                        //p.setColor(Color.argb(128, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)));
+                                        c.drawPath(path, p);
+                                    }
+
                                     p.setStyle(Paint.Style.STROKE);
                                     p.setStrokeWidth(1);
                                     p.setColor(Color.BLACK);

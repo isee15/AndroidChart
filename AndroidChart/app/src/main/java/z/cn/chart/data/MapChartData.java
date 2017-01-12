@@ -2,6 +2,7 @@ package z.cn.chart.data;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.SparseArray;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -10,9 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import z.cn.chart.R;
 
@@ -22,12 +21,16 @@ import z.cn.chart.R;
  */
 
 public class MapChartData {
-    private static Map<Integer, List<MapFeature>> mapCache = new HashMap<>();
+    private static SparseArray<List<MapFeature>> mapCache = new SparseArray<>();
 
 
     public static int intToColor(int value, int[] colors, int min, int max) {
-        if (value < min) value = min;
-        if (value > max) value = max;
+        if (value < min) {
+            value = min;
+        }
+        if (value >= max) {
+            value = max - 1;
+        }
         double scaled = (value - min) * (colors.length - 1.0f) / (max - min);
         int color0 = colors[(int) scaled];
         int color1 = colors[(int) scaled + 1];
@@ -40,7 +43,7 @@ public class MapChartData {
     }
 
     public static List<MapFeature> getMapPaths(Context context, int mapId) {
-        if (mapCache.containsKey(mapId)) {
+        if (mapCache.get(mapId) != null) {
             return mapCache.get(mapId);
         }
         List<MapFeature> featureCollection = new ArrayList<>();

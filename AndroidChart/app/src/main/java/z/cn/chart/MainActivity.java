@@ -12,8 +12,11 @@ import android.widget.Spinner;
 
 import com.alibaba.fastjson.JSON;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +24,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import z.cn.chart.adapter.IMapChartAdapter;
 import z.cn.chart.adapter.MapChartValue;
-import z.cn.chart.data.MapChartData;
 import z.cn.chart.view.MapChartView;
 
 public class MainActivity extends AppCompatActivity {
@@ -62,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, listData);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, listData);
         spinner.setAdapter(dataAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 String selected = listData.get(position);
                 final int resId = getResources().getIdentifier(selected,
                         "raw", getPackageName());
-                mapView.setDataSource(resId);
+                //mapView.setDataSource(resId);
 
                 mapView.setAdapter(new IMapChartAdapter() {
                     @Override
@@ -80,8 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public int[] getColorRange() {
-                        int[] colors = {0x87cefa, Color.YELLOW,0xFF4500};
-                        return colors;
+                        return new int[]{0x87cefa, Color.YELLOW, 0xFF4500};
                     }
 
                     @Override
@@ -95,10 +96,26 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public Map<String, Integer> getValues() {
+                    public Map<String, Double> getValues() {
+                        String mResponse = "";
+                        try {
+                            InputStream is = MainActivity.this.getApplicationContext().getResources().openRawResource(R.raw.population_world_2010);
+                            int size = is.available();
+                            byte[] buffer = new byte[size];
+                            is.read(buffer);
+                            is.close();
+                            mResponse = new String(buffer);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Map<String, Double> ret = new HashMap<>();
+                        List<MapChartValue> users = JSON.parseArray(mResponse, MapChartValue.class);
+                        for (MapChartValue v :
+                                users) {
 
-                        List<MapChartValue> users = JSON.parseArray(text, MapChartValue.class);
-                        return null;
+                            ret.put(v.getName(), v.getValue());
+                        }
+                        return ret;
                     }
                 });
             }

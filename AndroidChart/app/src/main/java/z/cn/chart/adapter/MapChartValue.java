@@ -1,7 +1,7 @@
 package z.cn.chart.adapter;
 
 /**
- * Created by rui on 2017/1/12.
+ * Created by isee15 on 2017/1/12.
  */
 
 public class MapChartValue {
