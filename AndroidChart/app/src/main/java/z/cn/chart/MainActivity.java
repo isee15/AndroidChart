@@ -1,5 +1,6 @@
 package z.cn.chart;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -9,12 +10,18 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.alibaba.fastjson.JSON;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import z.cn.chart.adapter.IMapChartAdapter;
+import z.cn.chart.adapter.MapChartValue;
+import z.cn.chart.data.MapChartData;
 import z.cn.chart.view.MapChartView;
 
 public class MainActivity extends AppCompatActivity {
@@ -61,9 +68,39 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selected = listData.get(position);
-                int resId = getResources().getIdentifier(selected,
+                final int resId = getResources().getIdentifier(selected,
                         "raw", getPackageName());
                 mapView.setDataSource(resId);
+
+                mapView.setAdapter(new IMapChartAdapter() {
+                    @Override
+                    public int getResourceId() {
+                        return resId;
+                    }
+
+                    @Override
+                    public int[] getColorRange() {
+                        int[] colors = {0x87cefa, Color.YELLOW,0xFF4500};
+                        return colors;
+                    }
+
+                    @Override
+                    public int getValueMin() {
+                        return 0;
+                    }
+
+                    @Override
+                    public int getValueMax() {
+                        return 1000000;
+                    }
+
+                    @Override
+                    public Map<String, Integer> getValues() {
+
+                        List<MapChartValue> users = JSON.parseArray(text, MapChartValue.class);
+                        return null;
+                    }
+                });
             }
 
             @Override
@@ -73,3 +110,5 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 }
+
+

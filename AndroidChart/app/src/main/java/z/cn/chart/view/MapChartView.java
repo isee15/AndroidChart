@@ -13,6 +13,7 @@ import android.view.SurfaceView;
 import java.util.List;
 import java.util.Random;
 
+import z.cn.chart.adapter.IMapChartAdapter;
 import z.cn.chart.data.MapChartData;
 import z.cn.chart.data.MapFeature;
 import z.cn.chart.data.PointDouble;
@@ -52,6 +53,10 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
         holder = this.getHolder();
         holder.addCallback(this);
         drawThread = new DrawThread(holder);
+    }
+
+    public void setAdapter(IMapChartAdapter adapter) {
+
     }
 
     public void setDataSource(int mapId) {
