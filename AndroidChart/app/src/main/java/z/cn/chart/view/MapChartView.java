@@ -68,44 +68,6 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
         }
     }
 
-    public void setDataSource(final int mapId) {
-        if (!this.drawThread.isAlive() && isSurfaceViewCreated) {
-            this.drawThread = new DrawThread(holder);
-            final Context finalContext = this.getContext();
-            final MapChartView finalThis = this;
-            new AsyncTask<Void, Void, Void>() {
-                /**
-                 * Override this method to perform a computation on a background thread. The
-                 * specified parameters are the parameters passed to {@link #execute}
-                 * by the caller of this task.
-                 * <p>
-                 * This method can call {@link #publishProgress} to publish updates
-                 * on the UI thread.
-                 *
-                 * @param params The parameters of the task.
-                 * @return A result, defined by the subclass of this task.
-                 * @see #onPreExecute()
-                 * @see #onPostExecute
-                 * @see #publishProgress
-                 */
-                @Override
-                protected Void doInBackground(Void... params) {
-                    drawThread.dataSource = MapChartData.getMapPaths(finalContext, mapId);
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    finalThis.drawThread.isRun = true;
-                    finalThis.drawThread.start();
-                }
-            }.execute();
-
-        } else {
-            drawThread.dataSource = MapChartData.getMapPaths(this.getContext(), mapId);
-        }
-    }
-
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -146,13 +108,13 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
 
     class DrawThread extends Thread {
 
-        public boolean isRun;
-        public IMapChartAdapter adapter;
+        boolean isRun;
+        IMapChartAdapter adapter;
 
-        private SurfaceHolder holder;
+        private final SurfaceHolder holder;
         private List<MapFeature> dataSource;
 
-        public DrawThread(SurfaceHolder holder) {
+        DrawThread(SurfaceHolder holder) {
             this.holder = holder;
             isRun = true;
         }
@@ -162,7 +124,7 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
         public void run() {
 
             {
-                Canvas c = null;
+                Canvas c;
                 synchronized (holder) {
                     c = holder.lockCanvas();//锁定画布，一般在锁定后就可以通过其返回的画布对象Canvas，在其上面画图等操作了。
                     if (c != null) {
@@ -173,6 +135,7 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
             }
             if (this.adapter == null) return;
             this.dataSource = MapChartData.getMapPaths(getContext(), this.adapter.getResourceId());
+            Map<String, Double> values = this.adapter.getValues();
             double minx = Integer.MAX_VALUE;
             double maxx = Integer.MIN_VALUE;
             double miny = Integer.MAX_VALUE;
@@ -221,7 +184,6 @@ public class MapChartView extends SurfaceView implements SurfaceHolder.Callback 
                                     }
                                     path.close();
 
-                                    Map<String, Double> values = this.adapter.getValues();
                                     if (values != null && values.get(feature.getName()) != null) {
                                         p.setStyle(Paint.Style.FILL);
                                         p.setStrokeWidth(1);
